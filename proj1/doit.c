@@ -16,7 +16,7 @@ void run_command(char **argv){
     else if (pid == 0) {
 		/* child process */
 		if (execvp(argv[0], &argv[0]) < 0) {
-			cerr << "Execve error\n";
+			cerr << "Execvp error\n";
 			exit(1);
 		}
 	}else {
