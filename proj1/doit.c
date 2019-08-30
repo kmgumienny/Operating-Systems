@@ -12,7 +12,7 @@ using namespace std;
 #define MAX_CHAR 128
 #define MAX_ARG 32
 
-void run_command(char **argv, int **list_pid, char ** list_output, int **list_times, int run_background) {
+void run_command(char **argv, int **list_pid, char ** list_output, long **list_times, int run_background) {
     int pid, index;
     struct rusage info;
     struct timeval start, stop;
@@ -21,8 +21,8 @@ void run_command(char **argv, int **list_pid, char ** list_output, int **list_ti
     int fds[2];
     const char* output;
 
-    if(run_background)
-        pipe(fds);
+//    if(run_background)
+//        pipe(fds);
 
 
     if ((pid = fork()) < 0) {
@@ -32,11 +32,11 @@ void run_command(char **argv, int **list_pid, char ** list_output, int **list_ti
         gettimeofday(&start, NULL);
         if (pid == 0) {
             /* child process */
-            if(run_background){
-                dup2(fds[1], STDOUT_FILENO);
-                close(fds[0]);
-                close(fds[1]);
-            }
+//            if(run_background){
+//                dup2(fds[1], STDOUT_FILENO);
+//                close(fds[0]);
+//                close(fds[1]);
+//            }
             if (execvp(argv[0], &argv[0]) < 0) {
                 cerr << "Execvp error\n";
                 exit(1);
@@ -45,14 +45,16 @@ void run_command(char **argv, int **list_pid, char ** list_output, int **list_ti
         else {
             /* parent */
             if(run_background){
-                close(fds[1]);
-                int nbytes = read(fds[0], inbuf, sizeof(inbuf));
-                output = inbuf;
-                gettimeofday(&stop, NULL); //Stop the timer before clocking out of this function
+//                close(fds[1]);
+//                int nbytes = read(fds[0], inbuf, sizeof(inbuf));
+//                output = inbuf;
                 cout << "Process " << pid << " started running " << argv[0] << endl;
                 for(index = 0; index < 20; index++){
                     if(*list_pid[index] == 0) {
                         *list_pid[index] = pid;
+                        *list_times[index*2] = start.tv_sec;
+                        *list_times[(index*2)+1] = start.tv_usec;
+                        strcpy(list_output[index*2], argv[0]);
                         break;
                     }
                 }
@@ -71,32 +73,21 @@ void run_command(char **argv, int **list_pid, char ** list_output, int **list_ti
 //    string preempted_vol = "Times process preempted voluntarily: " + to_string( info.ru_nvcsw);
 //    string maj_fault = "Number major page faults: " + to_string(info.ru_majflt);
 //    string min_fault = "Number minor page faults: " + to_string(info.ru_minflt);
-
-    if(run_background){
-        strcpy(list_output[index*2], argv[0]);
-        strcpy(list_output[(index*2)+1], output);
-        *list_times[(index*7)]= (int) wall_clock_duration;
-        *list_times[(index*7) + 1]= (int) info.ru_utime.tv_usec;
-        *list_times[(index*7) + 2]= (int) info.ru_stime.tv_usec;
-        *list_times[(index*7) + 3]= (int) info.ru_nivcsw;
-        *list_times[(index*7) + 4]= (int) info.ru_nvcsw;
-        *list_times[(index*7) + 5]= (int) info.ru_majflt;
-        *list_times[(index*7) + 6]= (int) info.ru_minflt;
-
-    }else{
-        cout << setw(40) << list_output[41] << wall_clock_duration << endl;
-        cout << setw(40) << list_output[42] << info.ru_utime.tv_usec << endl;
-        cout << setw(40) << list_output[43] << info.ru_stime.tv_usec << endl;
+    if (!run_background) {
+        cout << setw(40) << list_output[41] << wall_clock_duration << "ms" << endl;
+        cout << setw(40) << list_output[42] << info.ru_utime.tv_usec / 1000 << "ms" << endl;
+        cout << setw(40) << list_output[43] << info.ru_stime.tv_usec / 1000 << "ms" << endl;
         cout << setw(40) << list_output[44] << info.ru_nivcsw << endl;
-        cout << setw(40) << list_output[45] << info.ru_nvcsw  << endl;
-        cout << setw(40) << list_output[46] << info.ru_majflt  << endl;
-        cout << setw(40) << list_output[47] << info.ru_minflt  << endl;
+        cout << setw(40) << list_output[45] << info.ru_nvcsw << endl;
+        cout << setw(40) << list_output[46] << info.ru_majflt << endl;
+        cout << setw(40) << list_output[47] << info.ru_minflt << endl;
     }
+
 }
 
 void configureStatistics(char** list_output){
     strcpy(list_output[40], "Command Output: ");
-    strcpy(list_output[41], "Wall clock time: ");
+    strcpy(list_output[41], "Total wall clock time till this message: ");
     strcpy(list_output[42], "User CPU time: ");
     strcpy(list_output[43], "System CPU time: ");
     strcpy(list_output[44], "Times process preempted involuntarily: ");
@@ -105,8 +96,9 @@ void configureStatistics(char** list_output){
     strcpy(list_output[47], "Number minor page faults: ");
 }
 
-int check_processes(int **list_pid, char ** list_output, int **list_times){
+int check_processes(int **list_pid, char ** list_output, long **list_times){
     int status;
+    struct rusage child_info;
     int curr_index = 0;
     for(curr_index; curr_index < 20; curr_index++) {
         if (*list_pid[curr_index] != '\0') {
@@ -114,18 +106,30 @@ int check_processes(int **list_pid, char ** list_output, int **list_times){
             if (return_pid == 0)
                 return 1;
             else if (return_pid == -1) {
-                cout << "Error in child process " << *list_pid[curr_index] << " running " << list_output[curr_index * 2]
-                     << " with error " << list_output[(curr_index * 2) + 1] << endl;
+                list_pid[curr_index] = 0;
             } else if (return_pid == *list_pid[curr_index]) {
                 cout << "Child process " << *list_pid[curr_index] << " running function \"" << list_output[curr_index * 2]
-                     << "\" finished with output " << endl << list_output[(curr_index * 2) + 1] << endl;
+                     << "\" finished with output above somewhere" << endl;
+                //<< list_output[(curr_index * 2) + 1] << endl;
                 *list_pid[curr_index] = 0;
                 *list_output[curr_index * 2] = '\0';
                 *list_output[(curr_index * 2) + 1] = '\0';
-                for (int i = 0; i < 8; i++) {
-                    cout << setw(40) << list_output[40 + i] << *list_times[(curr_index * 7) + i] << endl;
-                    *list_times[(curr_index * 7) + i] = '\0';
-                }
+
+                getrusage(RUSAGE_CHILDREN, &child_info);
+                timeval stop;
+                gettimeofday(&stop, NULL);
+
+                double wall_clock_duration = ((double) (stop.tv_sec - *list_times[curr_index*2]) * 1000 + (double) (stop.tv_usec - *list_times[(curr_index*2)+1]) / 1000);
+
+                cout << setw(40) << list_output[41] << wall_clock_duration << "ms" << endl;
+                cout << setw(40) << list_output[42] << child_info.ru_utime.tv_usec /1000 << "ms" << endl;
+                cout << setw(40) << list_output[43] << child_info.ru_stime.tv_usec /1000 << "ms" << endl;
+                cout << setw(40) << list_output[44] << child_info.ru_nivcsw << endl;
+                cout << setw(40) << list_output[45] << child_info.ru_nvcsw  << endl;
+                cout << setw(40) << list_output[46] << child_info.ru_majflt  << endl;
+                cout << setw(40) << list_output[47] << child_info.ru_minflt  << endl;
+
+
             }
         }
     }
@@ -142,13 +146,12 @@ int main(int argc, char **argv) {
 
     char prompt[] = "==>";
     char *token = (char *) malloc(MAX_CHAR * sizeof(char));
-    int status;
     int will_background = 0;
     char input[MAX_CHAR];
     char delimiter[] = " \n";
     char **args = (char **) calloc(MAX_ARG + 1, sizeof(char));
     int **list_pid = (int **) calloc(20, sizeof(int));
-    int **list_times = (int **) calloc(20 * 7, sizeof(int));
+    long **list_times = (long **) calloc(20 * 2, sizeof(long));
     char **list_output = (char **) calloc(48, sizeof(char));
 
 
@@ -159,7 +162,7 @@ int main(int argc, char **argv) {
         list_pid[i] = (int *) calloc(10, sizeof(int));
     }
     for (int i = 0; i < 20; i++) {
-        list_times[i] = (int *) calloc(16, sizeof(int));
+        list_times[i] = (long *) calloc(2, sizeof(long));
     }
     for (int i = 0; i < 48; i++) {
         list_output[i] = (char *) calloc(300, sizeof(char));
