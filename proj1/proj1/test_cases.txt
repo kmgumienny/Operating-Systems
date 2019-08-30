@@ -1,0 +1,83 @@
+Script started on Fri 30 Aug 2019 12:53:24 AM EDT
+[?1034hbash-4.2$ make
+g++ -o doit doit.c
+bash-4.2$ ./doit ls
+cmake-build-debug  CMakeLists.txt  doit  doit.c  doit.cpp  doit.h  foo.txt  makefile  test_cases  test_cases.txt
+Total wall clock time till this message: 3.22
+                         User CPU time: 0ms
+                       System CPU time: 1ms
+ Times process preempted involuntarily: 1
+   Times process preempted voluntarily: 4
+              Number major page faults: 0
+              Number minor page faults: 372
+==>cd ..
+
+
+
+Now in directory /ifs/home/kmgumienny/My_Documents/CS3013
+==>set prompt = " ><  <><   <^H>    ><>
+
+
+
+><>ls &
+
+
+
+Process 92963 started running ls
+><>proj1
+ls
+Child process 92963 running function "ls" finished with output above somewhere
+Total wall clock time till this message: 3277.94
+                         User CPU time: 0ms
+                       System CPU time: 2ms
+ Times process preempted involuntarily: 2
+   Times process preempted voluntarily: 6
+              Number major page faults: 0
+              Number minor page faults: 629
+
+
+
+proj1
+Total wall clock time till this message: 1.956
+                         User CPU time: 0ms
+                       System CPU time: 2ms
+ Times process preempted involuntarily: 1
+   Times process preempted voluntarily: 9
+              Number major page faults: 0
+              Number minor page faults: 444
+><>sleep 10s &
+
+
+
+Process 92980 started running sleep
+><>sleep 20s &
+Process 92985 started running sleep
+><>jobs
+Process 92980 is running sleep
+Process 92985 is running sleep
+><>exit
+Child process 92980 running function "sleep" finished with output above somewhere
+Total wall clock time till this message: 17930
+                         User CPU time: 2ms
+                       System CPU time: 3ms
+ Times process preempted involuntarily: 4
+   Times process preempted voluntarily: 10
+              Number major page faults: 0
+              Number minor page faults: 1151
+There are still processes running, please wait as you cannot yet exit.
+Child process 92985 running function "sleep" finished with output above somewhere
+Total wall clock time till this message: 20001.1
+                         User CPU time: 2ms
+                       System CPU time: 3ms
+ Times process preempted involuntarily: 5
+   Times process preempted voluntarily: 12
+              Number major page faults: 0
+              Number minor page faults: 1364
+
+
+
+Goodbye
+bash-4.2$ exit
+exit
+
+Script done on Fri 30 Aug 2019 12:55:58 AM EDT
