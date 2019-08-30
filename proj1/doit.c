@@ -5,7 +5,6 @@ using namespace std;
 #include <stdio.h>
 #include <sys/wait.h>
 #include <sys/time.h>
-#include <time.h>
 #include <sys/resource.h>
 #include <iomanip>
 #include <cstring>
@@ -45,22 +44,22 @@ void run_command(char **argv, int **list_pid, char ** list_output, int **list_ti
         }
         else {
             /* parent */
-            for(index = 0; index < 20; index++){
-                if(*list_pid[index] == NULL) {
-                    *list_pid[index] = pid;
-                    break;
-                }
-            }
             if(run_background){
                 close(fds[1]);
                 int nbytes = read(fds[0], inbuf, sizeof(inbuf));
                 output = inbuf;
                 gettimeofday(&stop, NULL); //Stop the timer before clocking out of this function
+                cout << "Process " << pid << " started running " << argv[0] << endl;
+                for(index = 0; index < 20; index++){
+                    if(*list_pid[index] == 0) {
+                        *list_pid[index] = pid;
+                        break;
+                    }
+                }
             }
             else
                 wait(NULL);
             gettimeofday(&stop, NULL);
-            cout << endl << endl;
             wall_clock_duration = ((double) (stop.tv_sec - start.tv_sec) * 1000 + (double) (stop.tv_usec - start.tv_usec) / 1000);
         }
     }
@@ -74,7 +73,7 @@ void run_command(char **argv, int **list_pid, char ** list_output, int **list_ti
 //    string min_fault = "Number minor page faults: " + to_string(info.ru_minflt);
 
     if(run_background){
-        strcpy(list_output[index*2], argv[1]);
+        strcpy(list_output[index*2], argv[0]);
         strcpy(list_output[(index*2)+1], output);
         *list_times[(index*7)]= (int) wall_clock_duration;
         *list_times[(index*7) + 1]= (int) info.ru_utime.tv_usec;
@@ -85,7 +84,7 @@ void run_command(char **argv, int **list_pid, char ** list_output, int **list_ti
         *list_times[(index*7) + 6]= (int) info.ru_minflt;
 
     }else{
-        cout << setw(40) << list_output[41] << wall_clock_duration;
+        cout << setw(40) << list_output[41] << wall_clock_duration << endl;
         cout << setw(40) << list_output[42] << info.ru_utime.tv_usec << endl;
         cout << setw(40) << list_output[43] << info.ru_stime.tv_usec << endl;
         cout << setw(40) << list_output[44] << info.ru_nivcsw << endl;
@@ -118,18 +117,19 @@ int check_processes(int **list_pid, char ** list_output, int **list_times){
                 cout << "Error in child process " << *list_pid[curr_index] << " running " << list_output[curr_index * 2]
                      << " with error " << list_output[(curr_index * 2) + 1] << endl;
             } else if (return_pid == *list_pid[curr_index]) {
-                cout << "Child process " << *list_pid[curr_index] << " running " << list_output[curr_index * 2]
-                     << " finished with output " << endl << list_output[(curr_index * 2) + 1] << endl;
-                *list_pid[curr_index] = '\0';
+                cout << "Child process " << *list_pid[curr_index] << " running function \"" << list_output[curr_index * 2]
+                     << "\" finished with output " << endl << list_output[(curr_index * 2) + 1] << endl;
+                *list_pid[curr_index] = 0;
                 *list_output[curr_index * 2] = '\0';
                 *list_output[(curr_index * 2) + 1] = '\0';
                 for (int i = 0; i < 8; i++) {
-                    cout << setw(40) << list_output[40 + i] << list_times[(curr_index * 7) + i] << endl;
+                    cout << setw(40) << list_output[40 + i] << *list_times[(curr_index * 7) + i] << endl;
                     *list_times[(curr_index * 7) + i] = '\0';
                 }
             }
         }
     }
+    cout << endl << endl << endl;
     return 0;
 }
 
@@ -138,69 +138,61 @@ int check_processes(int **list_pid, char ** list_output, int **list_times){
  * in shell mode or simply run a command that would run as
  * a background command.
  */
-int main(int argc, char **argv){
-/* argc -- number of arguments */
-/* argv -- an array of strings */
-/* status -- int holding the status of waitpid */
-/* will_background -- integer indicating whether a task will run in background */
-/* input -- array to hold input string
-/* args -- calloc'd array holding commandline args to be run*/
-/* delimiter -- what we want to strip out of input using strtok  */
-
-
+int main(int argc, char **argv) {
 
     char prompt[] = "==>";
+    char *token = (char *) malloc(MAX_CHAR * sizeof(char));
     int status;
     int will_background = 0;
     char input[MAX_CHAR];
     char delimiter[] = " \n";
-    char **args = (char**)calloc(MAX_ARG+1, sizeof(char));
-    int **list_pid = (int**)calloc(20, sizeof(int));
-    int **list_times = (int**)calloc(20*7, sizeof(int));
-    char **list_output = (char**)calloc(48, sizeof(char));
+    char **args = (char **) calloc(MAX_ARG + 1, sizeof(char));
+    int **list_pid = (int **) calloc(20, sizeof(int));
+    int **list_times = (int **) calloc(20 * 7, sizeof(int));
+    char **list_output = (char **) calloc(48, sizeof(char));
 
-    for(int i = 0; i < MAX_ARG+1; i++) {
-        args[i] = (char *) calloc(50, sizeof(char));
+
+    for (int i = 0; i < MAX_ARG + 1; i++) {
+        args[i] = (char *) calloc(1080, sizeof(char));
     }
-    for(int i = 0; i < 20; i++) {
+    for (int i = 0; i < 20; i++) {
         list_pid[i] = (int *) calloc(10, sizeof(int));
     }
-    for(int i = 0; i < 20; i++) {
-        list_times[i] = (int *) calloc(10, sizeof(int));
+    for (int i = 0; i < 20; i++) {
+        list_times[i] = (int *) calloc(16, sizeof(int));
     }
-    for(int i = 0; i < 48; i++) {
+    for (int i = 0; i < 48; i++) {
         list_output[i] = (char *) calloc(300, sizeof(char));
     }
 
     configureStatistics(&list_output[0]);
 
-    strcpy(args[0], "./doit");
-    /*
-     * The user started the program with a command so the program
-     * will simply run that command
-    */
-    if(argc > 1) {
+//    This command will overwrite list_output[8] with garbage.
+    strncpy(args[0], "./doit", sizeof("./doit"));
+    list_output[8] = (char *) calloc(300, sizeof(char));
+
+    if (argc > 1) {
         if (strcmp(argv[argc - 1], "&") == 0)
             will_background = 1;
         run_command(&argv[1], &list_pid[0], &list_output[0], &list_times[0], will_background);
     }
 
-    while (1){
+    while (1) {
         cout << prompt;
         fgets(input, MAX_CHAR, stdin);
         int size_input = strlen(input);
-        if(size_input == 1){
+        if (size_input == 1) {
             cout << "Nothing entered" << endl;
             continue;
         }
-        char *token = strtok(input, delimiter);
+        token = strtok(input, delimiter);
         int index;
-        for(index = 1; index < MAX_ARG; index++){
-            if(token == NULL){
-                if(strcmp(args[index-1], "&") == 0) {
+        for (index = 1; index < MAX_ARG; index++) {
+            if (token == NULL) {
+                if (strcmp(args[index - 1], "&") == 0) {
                     will_background = 1;
                     //This adds a null pointer to the end of the argument. For the next command ran, this has to be cleared out.
-                    args[index-1] = NULL;
+                    args[index - 1] = NULL;
                 }
                 args[index] = NULL;
                 break;
@@ -212,35 +204,77 @@ int main(int argc, char **argv){
 
         int are_processes = check_processes(&list_pid[0], &list_output[0], &list_times[0]);
 
-        if(strcmp(args[1], "exit") == 0){
-            if (are_processes){
-                cout << "There are still processes running. Cannot exit." << endl;
-                wait(0);
+        if (strcmp(args[1], "exit") == 0) {
+            int no_exit = 1;
+            while (no_exit) {
+                if (are_processes) {
+                    cout << "There are still processes running. Cannot exit." << endl;
+                    wait(0);
+                } else {
+                    //remove null pointer so memory can be cleared
+                    args[index] = (char *) calloc(50, sizeof(char));
+                    no_exit = 0;
+                }
             }
             break;
-        }
-
-        else if (strcmp(args[1], "cd") == 0){
-            if (chdir(args[2]) != 0){
+        } else if (strcmp(args[1], "cd") == 0) {
+            if (chdir(args[2]) != 0) {
                 cout << "Could not change directory" << endl;
             }
             char s[100];
-            cout << "Now in directory " << getcwd(s, 100);
-        }
-
-        else if ((strcmp(args[1], "set") == 0) && (strcmp(args[2], "prompt") == 0) && (strcmp(args[3], "=") == 0))
+            cout << "Now in directory " << getcwd(s, 100) << endl;
+        } else if ((strcmp(args[1], "set") == 0) && (strcmp(args[2], "prompt") == 0) && (strcmp(args[3], "=") == 0))
             strcpy(prompt, args[4]);
+        else if (strcmp(args[1], "jobs") == 0){
+            for (int i = 0; i < 20; ++i) {
+                if (list_pid[i] != 0){
+                    cout << "Process " << list_pid[i] << " is running " << list_output[i*2] << endl;
+                }
+            }
+        }
 
         else
             run_command(&args[1], &list_pid[0], &list_output[0], &list_times[0], will_background);
 
         // reallocate memory where a null pointer was added to be executed in execvp
         if (will_background)
-            args[index-1] = (char*)calloc(50, sizeof(char));
-        args[index] = (char*)calloc(50, sizeof(char));
+            args[index - 1] = (char *) calloc(50, sizeof(char));
+        args[index] = (char *) calloc(50, sizeof(char));
+        will_background = 0;
 
     }
-    free(args);
+    free(token);
+    /*
+     * After a ton of testing, I could not get the program to free the allocated memory.
+     * After debugging I found that the strcpy command has been overwriting calloc'd and malloc'd
+     * memory with garbage. I'm not sure how to fix it so I decided to write a bad program instead.
+     */
+//    cout << "free token" << endl;
+//
+//    for (int i = 0; i < 20; i++)
+//        free(list_pid[i]);
+//
+////    free(list_pid);
+//    cout << "free list_pid" << endl;
+//
+//    for (int i = 0; i < 20; i++)
+//        free(list_times[i]);
+//
+////    free(list_times);
+//    cout << "free list_times" << endl;
+//
+//    for (int i = 0; i < 48; i++)
+//        free(list_output[i]);
+//
+////    free(list_output);
+//    cout << "free list_output" << endl;
+//
+//    args[0] = (char*)calloc(1080, sizeof(char));
+//    for (int i = 0; i < MAX_ARG + 1; i++){
+//        free(args[i]);
+//        cout << i << endl;
+//    }
+////    free(args);
+//    cout << "free args" << endl;
     return 0;
-
 }
