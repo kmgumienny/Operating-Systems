@@ -1,0 +1,56 @@
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  318.985736] User 1000 is closing file descriptor 34 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.005860] User 1001 is opening file /etc/localtime 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.005876] User 1001 is closing file descriptor 11 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.005898] User 1001 is opening file /etc/localtime 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.005903] User 1001 is closing file descriptor 11 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.007126] User 1000 is closing file descriptor 5 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.010778] User 1000 is closing file descriptor 16 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.010965] User 1000 is closing file descriptor 18 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.011043] User 1000 is closing file descriptor 4 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.011141] User 1000 is closing file descriptor 70 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.104084] User 1000 is closing file descriptor 26 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.106785] User 1000 is closing file descriptor 26 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.437741] User 1000 is opening file /etc/localtime 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.437758] User 1000 is closing file descriptor 11 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.437791] User 1000 is opening file /etc/localtime 
+Sep  6 17:12:01 cs3013-VirtualBox kernel: [  319.437795] User 1000 is closing file descriptor 11 
+Sep  6 17:12:02 cs3013-VirtualBox kernel: [  320.741775] User 1000 is closing file descriptor 3 
+Sep  6 17:12:02 cs3013-VirtualBox kernel: [  320.741778] User 1000 is closing file descriptor 4 
+Sep  6 17:12:02 cs3013-VirtualBox kernel: [  320.741858] User 1000 is closing file descriptor 4 
+Sep  6 17:12:02 cs3013-VirtualBox kernel: [  320.741862] User 1000 is closing file descriptor 3 
+cs3013@cs3013-VirtualBox:~$ tail -n 1000 /var/log/syslog
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.479971] User 1001 is opening file /etc/fonts/conf.d/80-delicious.conf 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.479997] User 1001 is closing file descriptor 14 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480003] User 1001 is opening file /etc/fonts/conf.d/89-tlwg-garuda-synthetic.conf 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480048] User 1001 is closing file descriptor 14 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480053] User 1001 is opening file /etc/fonts/conf.d/89-tlwg-kinnari-synthetic.conf 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480098] User 1001 is closing file descriptor 14 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480103] User 1001 is opening file /etc/fonts/conf.d/89-tlwg-laksaman-synthetic.conf 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480147] User 1001 is closing file descriptor 14 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480153] User 1001 is opening file /etc/fonts/conf.d/89-tlwg-loma-synthetic.conf 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480195] User 1001 is closing file descriptor 14 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480201] User 1001 is opening file /etc/fonts/conf.d/89-tlwg-umpush-synthetic.conf 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480244] User 1001 is closing file descriptor 14 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480250] User 1001 is opening file /etc/fonts/conf.d/89-tlwg-waree-synthetic.conf 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480278] User 1001 is closing file descriptor 14 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480284] User 1001 is opening file /etc/fonts/conf.d/90-fonts-nanum.conf 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480552] User 1001 is closing file descriptor 14 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480558] User 1001 is opening file /etc/fonts/conf.d/90-synthetic.conf 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480643] User 1001 is closing file descriptor 14 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480651] User 1001 is opening file /etc/fonts/conf.d/99-language-selector-zh.conf 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480733] User 1001 is closing file descriptor 14 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480738] User 1001 is opening file /etc/fonts/conf.d/99pdftoopvp.conf 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480763] User 1001 is closing file descriptor 14 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480766] User 1001 is closing file descriptor 13 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480793] User 1001 is closing file descriptor 12 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480797] User 1001 is opening file /usr/share/fonts 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480801] User 1001 is closing file descriptor 12 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480805] User 1001 is opening file /var/cache/fontconfig//3830d5c3ddfd5cd38a049b759396e72e-le32d4.cache-6 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480822] User 1001 is opening file /usr/share/fonts 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480840] User 1001 is closing file descriptor 13 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480842] User 1001 is closing file descriptor 12 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480847] User 1001 is opening file /usr/local/share/fonts 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480849] User 1001 is closing file descriptor 12 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480852] User 1001 is opening file /var/cache/fontconfig//4c599c202bc5c08e2d34565a40eac3b2-le32d4.cache-6 
+Sep  6 17:12:42 cs3013-VirtualBox kernel: [  360.480856] User 1001 is opening file /usr/local/share/fonts 
+
