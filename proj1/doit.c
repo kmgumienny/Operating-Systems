@@ -21,8 +21,8 @@ using namespace std;
 
 void print_stats(double wall, struct timeval user, struct timeval sys, long inv, long vol, long maj, long min){
     cout << setw(40) << "Total wall clock time till this message: " << wall << endl;
-    cout << setw(40) << "User CPU time: " << ((double)(user.tv_usec / 1000) + (double)(user.tv_sec * 1000)) << "ms" << endl;
-    cout << setw(40) << "System CPU time: " << ((double)(sys.tv_usec / 1000) + (double)(sys.tv_sec * 1000)) << "ms" << endl;
+    cout << setw(40) << "User CPU time: " << (double)(user.tv_usec + user.tv_sec * 1000000) << "ms" << endl;
+    cout << setw(40) << "System CPU time: " << (double)(sys.tv_usec + sys.tv_sec * 1000000) << "ms" << endl;
     cout << setw(40) << "Times process preempted involuntarily: " << inv << endl;
     cout << setw(40) << "Times process preempted voluntarily: " << vol << endl;
     cout << setw(40) << "Number major page faults: " << maj << endl;
@@ -65,7 +65,7 @@ void run_command(char **argv, int **list_pid, char ** list_output, long **list_t
             else
                 wait(NULL);
             gettimeofday(&stop, NULL);
-            wall_clock_duration = ((double) (stop.tv_sec - start.tv_sec) * 1000 + (double) (stop.tv_usec - start.tv_usec) / 1000);
+            wall_clock_duration = ((double) (stop.tv_sec - start.tv_sec) * 1000000 + (double) (stop.tv_usec - start.tv_usec));
         }
     }
     getrusage(RUSAGE_SELF, &info);
@@ -100,7 +100,7 @@ int check_processes(int **list_pid, char ** list_output, long **list_times){
                 timeval stop;
                 gettimeofday(&stop, NULL);
 
-                double wall_clock_duration = ((double) (stop.tv_sec - *list_times[curr_index*2]) * 1000 + (double) (stop.tv_usec - *list_times[(curr_index*2)+1]) / 1000);
+                double wall_clock_duration = ((double) (stop.tv_sec - *list_times[curr_index*2]) * 1000000 + stop.tv_usec - *list_times[(curr_index*2)+1]);
                 print_stats(wall_clock_duration, child_info.ru_utime, child_info.ru_stime, child_info.ru_nivcsw, child_info.ru_nvcsw,
                             child_info.ru_majflt, child_info.ru_minflt);
             }
