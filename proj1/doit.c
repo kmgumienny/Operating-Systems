@@ -130,10 +130,6 @@ int main(int argc, char **argv) {
     long **list_times = (long **) calloc(20 * 2, sizeof(long));
     char **list_output = (char **) calloc(40*300, sizeof(char));
 
-//    for (int i = 0; i < MAX_ARG + 1; i++) {
-//        args[i] = (char *) calloc(1080, sizeof(char));
-//    }
-
     for (int i = 0; i < 20; i++) {
         list_pid[i] = (int *) calloc(2, sizeof(int));
         *list_pid[i] = 0;
@@ -145,6 +141,8 @@ int main(int argc, char **argv) {
         list_output[i] = (char *) calloc(300, sizeof(char));
     }
 
+    int enter_shell = 1;
+
     if (argc > 1) {
         if (strcmp(argv[argc-1], "&") == 0) {
             will_background = 1;
@@ -152,10 +150,11 @@ int main(int argc, char **argv) {
             argv[argc - 1] = NULL;
         }
         run_command(&argv[1], &list_pid[0], &list_output[0], &list_times[0], will_background);
+        enter_shell = 0;
     }
     will_background = 0;
 
-    while (1) {
+    while (enter_shell) {
         cout << prompt;
         fgets(input, MAX_CHAR, stdin);
         int size_input = strlen(input);
