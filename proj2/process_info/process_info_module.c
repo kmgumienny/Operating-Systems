@@ -2,33 +2,37 @@
 #include <linux/module.h>
 #include <linux/syscalls.h>
 #include <linux/sched.h>
-#include <linux/include/asm-generic/cputime.h>
+#include <linux/time.h>
+#include <linux/list.h>
+#include <linux/list.h>
+#include "process_struct.h"
+//#include <asm-generic/cputime.h>
 
 
 unsigned long **sys_call_table;
 
 asmlinkage long (*ref_sys_cs3013_syscall2)(void);
 
-asmlinkage long new_sys_cs3013_syscall2(struct processinfo info) {
+asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
     /*
      * A value of -1 signifies field did not have appropriate value available
      */
     struct processinfo kernel_info;
     // https://docs.huihoo.com/doxygen/linux/kernel/3.7/structtask__struct.html
     struct task_struct *current_task = get_current();
+    struct list_head *list;
 
-    kernel_info.state = current_task.state;
-    kernel_info.pid = current_task.pid;
-    kernel_info.parent_pid = current_task.parent.pid;
+    kernel_info.state = (*current_task).state;
+    kernel_info.pid = current_task->pid;
+    kernel_info.parent_pid = current_task->parent->pid;
     kernel_info.youngest_child = -1;
     kernel_info.younger_sibling = -1;
     kernel_info.older_sibling = -1;
-    kernel_info.uid = current_uid();
+    kernel_info.uid = current_uid().val;
     //  1325     struct timespec real_start_time;    /* boot based time */
-    kernel_info.start_time = (current_task.real_start_time.tv_sec * 1000000) +
-            (current_task.real_start_time.tv_nsec / 1000);
-    kernel_info.user_time = cputime_to_usecs(current_task.utime);
-    kernel_info.sys_time = cputime_to_usecs(current_task.stime);
+    kernel_info.start_time = timespec_to_ns(&current_task->real_start_time);
+    kernel_info.user_time = cputime_to_usecs(current_task->utime);
+    kernel_info.sys_time = cputime_to_usecs(current_task->stime);
     kernel_info.cutime = -1;
     kernel_info.cstime = -1;
 
@@ -51,11 +55,10 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo info) {
      * of current_task's children and siblings
      */
 
-    list_for_each(list, &current_task.children){
-        struct task_struct child_task = list_entry(list, struct task_struct, children);
+    list_for_each(list, &current_task->children){
+        struct task_struct child_task = list_entry(list, struct task_struct, sibling);
 
-        long long this_child_time = (child_task.real_start_time.tv_sec * 1000000) +
-                (child_task.real_start_time.tv_nsec / 1000);
+        long long this_child_time = timespec_to_ns(&child_task->real_start_time);
 
         if (kernel_info.cutime == -1 || current_youngest_child_time > this_child_time) {
             kernel_info.youngest_child = child_task.pid;
@@ -79,11 +82,10 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo info) {
      * We iterate the second list_head containing this processes siblings
      */
 
-    list_for_each(list, &current_task.sibling){
+    list_for_each(list, &current_task->sibling){
         struct task_struct sibling_task = list_entry(list, struct task_struct, sibling);
 
-        long long this_sibling_runtime = (sibling_task.real_start_time.tv_sec * 1000000) +
-                (sibling_task.real_start_time.tv_nsec / 1000);
+        long long this_sibling_runtime = timespec_to_ns(&sibling_task->real_start_time);
 
         if (kernel_info.younger_sibling == -1 || (kernel_info.start_time > this_sibling_runtime &&
             current_younger_sibling_time < this_sibling_runtime)) {
