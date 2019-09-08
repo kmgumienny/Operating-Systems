@@ -18,6 +18,8 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
      * A value of -1 signifies field did not have appropriate value available
      */
     struct processinfo kernel_info;
+    struct task_struct *child_task;
+    struct task_struct *sibling_task
     // https://docs.huihoo.com/doxygen/linux/kernel/3.7/structtask__struct.html
     struct task_struct *current_task = get_current();
     struct list_head *list;
@@ -56,7 +58,7 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
      */
 
     list_for_each(list, &current_task->children){
-        struct task_struct child_task = list_entry(list, struct task_struct, sibling);
+        child_task = list_entry(list, struct task_struct, sibling);
 
         long long this_child_time = timespec_to_ns(&child_task->real_start_time);
 
@@ -83,7 +85,7 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
      */
 
     list_for_each(list, &current_task->sibling){
-        struct task_struct sibling_task = list_entry(list, struct task_struct, sibling);
+        sibling_task = list_entry(list, struct task_struct, sibling);
 
         long long this_sibling_runtime = timespec_to_ns(&sibling_task->real_start_time);
 
