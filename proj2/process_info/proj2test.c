@@ -36,7 +36,6 @@ long testCall2 (struct processinfo *info) {
     cout << setw(40) << "CPU user time of children: " << info.cutime << endl;
     cout << setw(40) << "CPU system time of children: " << info.cstime << endl;
 
-
 	return 0;
 }
 long testCall3 ( void) {

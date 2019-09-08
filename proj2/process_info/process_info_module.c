@@ -101,8 +101,10 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
         }
     }
 
-    if (copy_to_user(info, &kernel_info, sizeof kernel_info))
+    if (copy_to_user(info, &kernel_info, sizeof kernel_info)) {
         printk(KERN_INFO "Copying to user failed \n");
+        return EFAULT;
+    }
 
     return 0;
 }
