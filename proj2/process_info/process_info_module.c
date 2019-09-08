@@ -4,7 +4,7 @@
 #include <linux/sched.h>
 #include <linux/time.h>
 #include <linux/list.h>
-#include <linux/list.h>
+#include <asm/cputime.h>
 #include "process_struct.h"
 //#include <asm-generic/cputime.h>
 
@@ -19,9 +19,9 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
      */
     struct processinfo kernel_info;
     struct task_struct *child_task;
-    struct task_struct *sibling_task
+    struct task_struct *sibling_task;
     // https://docs.huihoo.com/doxygen/linux/kernel/3.7/structtask__struct.html
-    struct task_struct *current_task = get_current();
+    struct task_struct *current_task = current;
     struct list_head *list;
 
     kernel_info.state = (*current_task).state;
@@ -63,7 +63,7 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
         long long this_child_time = timespec_to_ns(&child_task->real_start_time);
 
         if (kernel_info.cutime == -1 || current_youngest_child_time > this_child_time) {
-            kernel_info.youngest_child = child_task.pid;
+            kernel_info.youngest_child = child_task->pid;
             current_youngest_child_time = this_child_time;
         }
 
@@ -76,8 +76,8 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
         if (kernel_info.cstime == -1)
             kernel_info.cstime += 1;
 
-        kernel_info.cutime += cputime_to_usecs(child_task.utime);
-        kernel_info.cstime += cputime_to_usecs(child_task.stime);
+        kernel_info.cutime += cputime_to_usecs(child_task->utime);
+        kernel_info.cstime += cputime_to_usecs(child_task->stime);
     }
 
     /*
@@ -91,17 +91,17 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
 
         if (kernel_info.younger_sibling == -1 || (kernel_info.start_time > this_sibling_runtime &&
             current_younger_sibling_time < this_sibling_runtime)) {
-            kernel_info.younger_sibling = sibling_task.pid;
-            current_younger_sibling_time = this_child_time;
+            kernel_info.younger_sibling = sibling_task->pid;
+            current_younger_sibling_time = this_sibling_runtime;
         }
         if (kernel_info.older_sibling == -1 || (kernel_info.start_time < this_sibling_runtime &&
             current_older_sibling_time > this_sibling_runtime)) {
-            kernel_info.older_sibling = sibling_task.pid;
-            current_older_sibling_time = this_child_time;
+            kernel_info.older_sibling = sibling_task->pid;
+            current_older_sibling_time = this_sibling_runtime;
         }
     }
 
-    if (copy_to_user(info, &kinfo, sizeof kinfo))
+    if (copy_to_user(info, &kernel_info, sizeof kernel_info))
         printk(KERN_INFO "Copying to user failed \n");
 
     return 0;
