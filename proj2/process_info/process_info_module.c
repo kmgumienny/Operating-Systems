@@ -23,30 +23,19 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
     struct task_struct *current_task = current;
     struct list_head *list;
 
-        printk(KERN_INFO "1 \n");
-
     kernel_info.state = current_task->state;
-        printk(KERN_INFO "2 \n");
     kernel_info.pid = current_task->pid;
-        printk(KERN_INFO "3 \n");
     kernel_info.parent_pid = current_task->parent->pid;
-        printk(KERN_INFO "4 \n");
     kernel_info.youngest_child = -1;
     kernel_info.younger_sibling = -1;
     kernel_info.older_sibling = -1;
-        printk(KERN_INFO "5 \n");
     kernel_info.uid = current_uid().val;
-        printk(KERN_INFO "6 \n");
     kernel_info.start_time = timespec_to_ns(&current_task->real_start_time);
-        printk(KERN_INFO "7 \n");
     kernel_info.user_time = cputime_to_usecs(current_task->utime);
-        printk(KERN_INFO "8 \n");
     kernel_info.sys_time = cputime_to_usecs(current_task->stime);
-        printk(KERN_INFO "9 \n");
     kernel_info.cutime = -1;
     kernel_info.cstime = -1;
 
-        printk(KERN_INFO "10 \n");
 
 
     long long current_youngest_child_time = 0;
@@ -63,9 +52,11 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
         child_task = list_entry(list, struct task_struct, sibling);
 
         long long this_child_time = timespec_to_ns(&child_task->real_start_time);
-
-        if (kernel_info.cutime == -1 || current_youngest_child_time > this_child_time) {
-            kernel_info.youngest_child = child_task->pid;
+	printk(KERN_INFO "Time of child %lli \n", this_child_time);
+        
+	if (kernel_info.cutime == -1 || (current_youngest_child_time > this_child_time)) {
+	    printk(KERN_INFO "PID of child %d \n", child_task->pid);            
+	    kernel_info.youngest_child = child_task->pid;
             current_youngest_child_time = this_child_time;
         }
 
@@ -82,7 +73,7 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
         kernel_info.cstime += cputime_to_usecs(child_task->stime);
     }
 
-        printk(KERN_INFO "11 \n");
+
 
     /*
      * We iterate the second list_head containing this processes siblings
@@ -105,14 +96,12 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
         }
     }
 
-        printk(KERN_INFO "12 \n");
 
     if (copy_to_user(info, &kernel_info, sizeof kernel_info)) {
         printk(KERN_INFO "Copying to user failed \n");
         return EFAULT;
     }
 
-printk(KERN_INFO "13 \n");
 
     return 0;
 }
