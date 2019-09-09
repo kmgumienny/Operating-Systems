@@ -39,15 +39,17 @@ int main () {
 
 			if ((int) syscall(__NR_cs3013_syscall2, &info) == -1)
 				return -1;
-	
-			cout << "It worked" << endl;
+			
+			for (int i = 0; i < 100000000; i++){
+				i = i;
+			}
 
     			cout << setw(40) << "Current state of process: " << info.state << endl;
     			cout << setw(40) << "Process ID of this process: " << info.pid << endl;
     			cout << setw(40) << "Process ID of parent process: " << info.parent_pid << endl;
     			cout << setw(40) << "Process ID of youngest child process: " << info.youngest_child << endl;
-    			cout << setw(40) << "Process ID of a child process: " << info.younger_sibling << endl;
-    			cout << setw(40) << "Process ID of next oldest process: " << info.older_sibling << endl;
+    			cout << setw(40) << "Process ID of a younger sibling process: " << info.younger_sibling << endl;
+    			cout << setw(40) << "Process ID of older sibling process: " << info.older_sibling << endl;
     			cout << setw(40) << "User ID of process owner: " << info.uid << endl;
     			cout << setw(40) << "Time since boot: " << info.start_time << endl;
     			cout << setw(40) << "CPU time in user mode: " << info.user_time << endl;

@@ -38,26 +38,21 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
 
 
 
-    long long current_youngest_child_time = 0;
-    long long current_younger_sibling_time = 0;
-    long long current_older_sibling_time = 0;
-
     /*
      * http://tuxthink.blogspot.com/2011/03/listforeach-and-listentry.html
      * Article above explains how to iterate the list_head structure
      * of current_task's children and siblings
      */
+    pid_t this_child_pid;
 
     list_for_each(list, &current_task->children){
         child_task = list_entry(list, struct task_struct, sibling);
 
-        long long this_child_time = timespec_to_ns(&child_task->real_start_time);
-	printk(KERN_INFO "Time of child %lli \n", this_child_time);
+        this_child_pid = child_task->pid;
         
-	if (kernel_info.cutime == -1 || (current_youngest_child_time > this_child_time)) {
+	if (kernel_info.cutime == -1 || (this_child_pid > kernel_info.youngest_child)) {
 	    printk(KERN_INFO "PID of child %d \n", child_task->pid);            
 	    kernel_info.youngest_child = child_task->pid;
-            current_youngest_child_time = this_child_time;
         }
 
         /* Make sure we don't have the -1 value if we do find children
@@ -78,24 +73,25 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
     /*
      * We iterate the second list_head containing this processes siblings
      */
-
+    pid_t this_sibling_pid;
+    
     list_for_each(list, &current_task->sibling){
         sibling_task = list_entry(list, struct task_struct, sibling);
 
-        long long this_sibling_runtime = timespec_to_ns(&sibling_task->real_start_time);
-
-        if (kernel_info.younger_sibling == -1 || (kernel_info.start_time > this_sibling_runtime &&
-            current_younger_sibling_time < this_sibling_runtime)) {
+        this_sibling_pid = sibling_task->pid;
+    	printk(KERN_INFO "PID of younger sibling %d \n", this_sibling_pid);  
+        
+	if (kernel_info.younger_sibling == -1 || (this_sibling_pid < kernel_info.younger_sibling &&
+            this_sibling_pid > kernel_info.pid)) {
             kernel_info.younger_sibling = sibling_task->pid;
-            current_younger_sibling_time = this_sibling_runtime;
         }
-        if (kernel_info.older_sibling == -1 || (kernel_info.start_time < this_sibling_runtime &&
-            current_older_sibling_time > this_sibling_runtime)) {
-            kernel_info.older_sibling = sibling_task->pid;
-            current_older_sibling_time = this_sibling_runtime;
+	else if (kernel_info.older_sibling == -1 || (this_sibling_pid < kernel_info.older_sibling &&
+            this_sibling_pid > kernel_info.pid)) {
+            kernel_info.older_sibling = this_sibling_pid;
         }
     }
-
+    
+          
 
     if (copy_to_user(info, &kernel_info, sizeof kernel_info)) {
         printk(KERN_INFO "Copying to user failed \n");
