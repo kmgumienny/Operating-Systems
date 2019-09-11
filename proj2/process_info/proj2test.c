@@ -21,6 +21,9 @@ int main () {
 
 	if ((pid1 = fork()) == 0){
 		if(pid1 == 0){
+		    for (int i = 0; i < 9999999; i++){
+			i+i;
+		    }
 			sleep(10);
 			return 0;	
 		}
@@ -30,12 +33,19 @@ int main () {
 	}else{
 		if (pid1 != 0 && (pid2 = fork()) == 0){
 			if(pid2 == 0){
+				for (int i = 0; i < 9999999; i++){
+				    i+i;
+				}
 				sleep(12);
 				return 0;
 			}
 			cout << "Fork 2 Error" << endl;
 			exit(1);
 		}else{
+			for (int i = 0; i < 9999999; i++){
+			    i+i;
+			}
+			sleep(2);
 
 			if ((int) syscall(__NR_cs3013_syscall2, &info) == -1)
 				return -1;

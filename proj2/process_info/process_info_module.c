@@ -22,6 +22,7 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
     // https://docs.huihoo.com/doxygen/linux/kernel/3.7/structtask__struct.html
     struct task_struct *current_task = current;
     struct list_head *list;
+    pid_t this_sibling_pid, this_child_pid;
 
     kernel_info.state = current_task->state;
     kernel_info.pid = current_task->pid;
@@ -43,10 +44,10 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
      * Article above explains how to iterate the list_head structure
      * of current_task's children and siblings
      */
-    pid_t this_child_pid;
+
 
     list_for_each(list, &current_task->children){
-        child_task = list_entry(list, struct task_struct, sibling);
+        child_task = list_entry(list, struct task_struct, children);
 
         this_child_pid = child_task->pid;
         
@@ -73,25 +74,23 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
     /*
      * We iterate the second list_head containing this processes siblings
      */
-    pid_t this_sibling_pid;
-    
-    list_for_each(list, &current_task->sibling){
-        sibling_task = list_entry(list, struct task_struct, sibling);
+
+    list_for_each(list, &current_task->real_parent->children){
+        sibling_task = list_entry(list, struct task_struct, children);
 
         this_sibling_pid = sibling_task->pid;
-    	printk(KERN_INFO "PID of younger sibling %d \n", this_sibling_pid);  
+	if (this_sibling_pid > 0){
+    	printk(KERN_INFO "PID of sibling %d \n", this_sibling_pid);  
         
-	if (kernel_info.younger_sibling == -1 || (this_sibling_pid < kernel_info.younger_sibling &&
-            this_sibling_pid > kernel_info.pid)) {
-            kernel_info.younger_sibling = sibling_task->pid;
+	if (this_sibling_pid < kernel_info.pid && (kernel_info.younger_sibling == -1 ||this_sibling_pid > kernel_info.younger_sibling)){
+            kernel_info.younger_sibling = this_sibling_pid;
         }
-	else if (kernel_info.older_sibling == -1 || (this_sibling_pid < kernel_info.older_sibling &&
-            this_sibling_pid > kernel_info.pid)) {
+	else if (this_sibling_pid > kernel_info.pid && (kernel_info.older_sibling == -1 ||this_sibling_pid < kernel_info.older_sibling)) {
             kernel_info.older_sibling = this_sibling_pid;
         }
+}
     }
-    
-          
+
 
     if (copy_to_user(info, &kernel_info, sizeof kernel_info)) {
         printk(KERN_INFO "Copying to user failed \n");
