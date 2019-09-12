@@ -1,3 +1,8 @@
+/*
+ Kamil Gumienny
+ Julian Pinzel
+*/
+
 using namespace std;
 #include <iostream>
 #include <iomanip>
@@ -58,7 +63,7 @@ int main () {
     			cout << setw(40) << "Process ID of this process: " << info.pid << endl;
     			cout << setw(40) << "Process ID of parent process: " << info.parent_pid << endl;
     			cout << setw(40) << "Process ID of youngest child process: " << info.youngest_child << endl;
-    			cout << setw(40) << "Process ID of a younger sibling process: " << info.younger_sibling << endl;
+    			cout << setw(40) << "Process ID of younger sibling process: " << info.younger_sibling << endl;
     			cout << setw(40) << "Process ID of older sibling process: " << info.older_sibling << endl;
     			cout << setw(40) << "User ID of process owner: " << info.uid << endl;
     			cout << setw(40) << "Time since boot: " << info.start_time << endl;

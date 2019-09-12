@@ -1,3 +1,7 @@
+/*
+ Kamil Gumienny
+ Julian Pinzel
+*/
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/syscalls.h>
@@ -9,7 +13,12 @@ asmlinkage long (*ref_sys_open)(const char __user *filename,
 
 asmlinkage long (*ref_sys_close)(unsigned int fd);
 
+asmlinkage long (*ref_sys_cs3013_syscall1)(void);
 
+asmlinkage long new_sys_cs3013_syscall1(void) {
+    printk(KERN_INFO "\"'Hello world?!' More like 'Goodbye, world!' EXTERMINATE!\" -- Dalek");
+    return 0;
+}
 
 asmlinkage long new_sys_open(const char __user *filename,
 				int flags, umode_t mode) {
@@ -82,12 +91,14 @@ static int __init interceptor_start(void) {
   /* edit function name here */
   ref_sys_open = (void *)sys_call_table[__NR_open];
   ref_sys_close = (void *)sys_call_table[__NR_close];
+  ref_sys_cs3013_syscall1 = (void *)sys_call_table[__NR_cs3013_syscall1];
 
   disable_page_protection();
 
   /* edit function name here */
   sys_call_table[__NR_open] = (unsigned long *)new_sys_open;
   sys_call_table[__NR_close] = (unsigned long *)new_sys_close;
+  sys_call_table[__NR_cs3013_syscall1] = (unsigned long *)new_sys_cs3013_syscall1;
   
   enable_page_protection();
   
@@ -106,6 +117,7 @@ static void __exit interceptor_end(void) {
   disable_page_protection();
   sys_call_table[__NR_open] = (unsigned long *)ref_sys_open;
   sys_call_table[__NR_close] = (unsigned long *)ref_sys_close;
+  sys_call_table[__NR_cs3013_syscall1] = (unsigned long *)ref_sys_cs3013_syscall1;
   enable_page_protection();
 
   printk(KERN_INFO "Unloaded interceptor!");

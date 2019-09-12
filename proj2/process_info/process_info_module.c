@@ -1,3 +1,8 @@
+/*
+ Kamil Gumienny
+ Julian Pinzel
+*/
+
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/syscalls.h>
@@ -31,7 +36,9 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
     kernel_info.younger_sibling = -1;
     kernel_info.older_sibling = -1;
     kernel_info.uid = current_uid().val;
-    kernel_info.start_time = timespec_to_ns(&current_task->real_start_time);
+    // Not sure why but the real_start_time is not of time_spec but U64
+    // Don't need to do timespec_to_ns like instructions say.
+    kernel_info.start_time = current_task->real_start_time;
     kernel_info.user_time = cputime_to_usecs(current_task->utime);
     kernel_info.sys_time = cputime_to_usecs(current_task->stime);
     kernel_info.cutime = -1;
@@ -75,7 +82,7 @@ asmlinkage long new_sys_cs3013_syscall2(struct processinfo *info) {
      * We iterate the second list_head containing this processes siblings
      */
 
-    list_for_each(list, &current_task->real_parent->children){
+    list_for_each(list, &current_task->sibling){
         sibling_task = list_entry(list, struct task_struct, children);
 
         this_sibling_pid = sibling_task->pid;
