@@ -1,14 +1,24 @@
+Kamil Gumienny & Julian Pinzer
+
 PHASE1:
-To create the LKM and test file, simply navigate to code directory in /proj2/open_close_intercept/ 
-In terminal run the command "make" which should create the LKM and user-land test code object file named "test"
-In terminal run ./test followed by "tail -n X /var/log/syslog" where X is an arbitrary integer 
-  specifying how many lines of log to print
-The logs should show UID and files that have been opened and closed alongside a call to ref_sys_cs3013_syscall1 
-  that gets intercepted.
+  To create the LKM and test file, simply navigate to code directory in /proj2/open_close_intercept/ 
+  In terminal run the command "make" which should create the LKM and user-land test code object file named "test"
+  Next, insert the Kernel Module by running "sudo insmod open_close_intercept.ko" and enter root password
+  In terminal run ./test followed by "tail -n X /var/log/syslog" where X is an arbitrary integer 
+   specifying how many lines of log to print
+  The logs should show UID and files that have been opened and closed alongside a call to ref_sys_cs3013_syscall1 
+   that gets intercepted.
   
 PHASE2:
-To create the LKM and test file, simply navigate to code directory in /proj2/open_close_intercept/ 
-In terminal run the command "make" which should create the LKM and user-land test code object file named "test"
-The test code waits 2 seconds before printing so that the children tasks have time to run through a for-loop
-  and log some CPU time. 
-All results should be printed in terminal as opposed to logs. 
+  To create the LKM and test file, simply navigate to code directory in /proj2/process_info/ 
+  In terminal run the command "make" which should create the LKM and user-land test code object file named "test"
+  Next, insert the Kernel Module by running "sudo insmod process_info_module.ko" and enter root password
+  Run the test user-land code by running "./test"
+  The test code waits 2 seconds before printing so that the children tasks have time to run through a for-loop
+    and log some CPU time. 
+  All results should be printed in terminal as opposed to logs. 
+
+CLEANING:
+  For both phases, simply type "make clean" in either of the two directories to remove compiled object and LKM files
+  To remove Phase 1 LKM run "sudo rmmod open_close_intercept.ko" and enter root password
+  To remove Phase 2 LKM run "sudo rmmod process_info_module.ko" and enter root password
