@@ -1,3 +1,7 @@
+/*
+    Kamil Gumienny
+    Julian Pinzer
+*/
 #include <sys/syscall.h>
 #include <stdio.h>
 #include <unistd.h>
