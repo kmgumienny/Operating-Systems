@@ -1,0 +1,14 @@
+PHASE1:
+To create the LKM and test file, simply navigate to code directory in /proj2/open_close_intercept/ 
+In terminal run the command "make" which should create the LKM and user-land test code object file named "test"
+In terminal run ./test followed by "tail -n X /var/log/syslog" where X is an arbitrary integer 
+  specifying how many lines of log to print
+The logs should show UID and files that have been opened and closed alongside a call to ref_sys_cs3013_syscall1 
+  that gets intercepted.
+  
+PHASE2:
+To create the LKM and test file, simply navigate to code directory in /proj2/open_close_intercept/ 
+In terminal run the command "make" which should create the LKM and user-land test code object file named "test"
+The test code waits 2 seconds before printing so that the children tasks have time to run through a for-loop
+  and log some CPU time. 
+All results should be printed in terminal as opposed to logs. 
