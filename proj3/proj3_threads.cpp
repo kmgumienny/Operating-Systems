@@ -6,6 +6,9 @@
 using namespace std;
 #include <pthread.h>
 #include <semaphore.h>
+#include <time.h>
+#include "msg.h"
+
 /* g++ -o pcthreads pcthreads.C -lpthread */
 sem_t psem, csem; /* semaphores */
 int n;
