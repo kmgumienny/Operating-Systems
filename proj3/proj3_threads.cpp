@@ -25,6 +25,55 @@ sem_t* csem; /* pointers to consumers (receivers) */
 struct msg* mailboxes;
 
 
+void SendMsg(int iTo, struct msg *pMsg) {
+    sem_wait(&psem[iTo]);
+    mailboxes[iTo].iFrom = pMsg->iFrom;
+    mailboxes[iTo].value = pMsg->value;
+    mailboxes[iTo].cnt = pMsg->cnt;
+    mailboxes[iTo].tot = pMsg->tot;
+    sem_post(&csem[iTo]);
+}
+
+
+void RecvMsg(int iRecv, struct msg *pMsg) { // msg as ptr, C/C++
+    sem_wait(&psem[iRecv]);
+    pMsg->value = mailboxes[iRecv].value;
+    sem_post(&csem[iRecv]);
+}
+
+
+void* adder(void* argv){
+    // cast to long here to avoid losing information (can't cast int).
+    time_t start, end;
+    start = time(NULL);
+    int mailbox_index = (long) argv;
+
+    // Malloc and then enter 0s to clear garbage data malloc designated
+    msg* my_message = static_cast<msg*>(malloc(sizeof(struct msg)));
+    my_message->iFrom = 0;
+    my_message->value = 0;
+    my_message->cnt = 0;
+    my_message->tot = 0;
+
+    while(1) {
+        RecvMsg(mailbox_index, my_message);
+
+        if (my_message->value > 0) {
+            my_message->cnt += 1;
+            my_message->value += my_message->value;
+            sleep(1);
+        }
+        // Terminate Thread because value less than -1 received.
+        else{
+            my_message->iFrom = mailbox_index;
+            my_message->tot = time(NULL)-start;
+            SendMsg(0, my_message);
+            return 0;
+        }
+    }
+}
+
+
 void InitMailBox(int num_mailboxes, pthread_t * threads){
     // add 1 to the total number of mailboxes because main thread
     mailboxes = static_cast<msg*>(malloc(num_mailboxes+1 * sizeof(struct msg)));
@@ -40,26 +89,9 @@ void InitMailBox(int num_mailboxes, pthread_t * threads){
             cout << "Issue creating thread " << i << ". Exiting.";
             exit(1);
         }
-
     }
-
 }
 
-void* adder(void* argv){
-    
-}
-
-void SendMsg(int iTo, struct msg *pMsg) {
-    sem_wait(&psem[iTo]);
-    mailboxes[iTo] = *pMsg;
-    sem_post(&csem[iTo]);
-}
-
-void RecvMsg(int iRecv, struct msg *pMsg) { // msg as ptr, C/C++
-    sem_wait(&psem[iRecv]);
-    *pMsg = mailboxes[iRecv];
-    sem_post(&csem[iRecv]);
-}
 
 int main(int argc, char *argv[]) {
     int num_mailboxes, value, destination, scan_return;
@@ -75,7 +107,7 @@ int main(int argc, char *argv[]) {
     try {
         num_mailboxes = atoi(argv[1]);
     } catch (const std::exception& e) { // caught by reference to base
-        std::cout << " Error on # mailboxes. Error reads: '"
+        std::cout << " Error regarding # mailboxes. Error reads: '"
                   << e.what() << "'\n";
     }
 
@@ -83,6 +115,10 @@ int main(int argc, char *argv[]) {
         cout << "Too many threads specified. Using the maximum of 10" << endl;
         num_mailboxes = 10;
     }
+
+    cout << "Program initialized with " << num_mailboxes << " mailboxes. Enter two integers between 1 and "
+    << num_mailboxes << " separated by a space (value destination_thread)."
+                        " Enter nonsense to end program and print statistics." << endl;
 
     InitMailBox(num_mailboxes, threads);
     sem_init(&psem[0], 0, 1);
@@ -106,6 +142,7 @@ int main(int argc, char *argv[]) {
             for (int i = 1; i <= num_mailboxes; i++){
                 SendMsg(i, msg);
             }
+
             for (int i = 1; i <= num_mailboxes; i++){
                 RecvMsg(i, msg);
                 cout << "The result from thread "
@@ -114,14 +151,23 @@ int main(int argc, char *argv[]) {
                         << msg -> cnt << " operations during "
                         << msg -> tot <<" secs." << endl;
             }
+
             for (int i = 0; i <= num_mailboxes; i++){
                 pthread_join(threads[i], NULL);
                 sem_destroy(&csem[i]);
                 sem_destroy(&psem[i]);
             }
-
             return 0;
         }
+
+        msg -> iFrom = 0;
+        msg -> value = value;
+        msg -> cnt = 0;
+        msg -> tot = 0;
+
+        SendMsg(destination, msg);
+
+
     }
 
 }
