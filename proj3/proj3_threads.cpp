@@ -36,9 +36,9 @@ void SendMsg(int iTo, struct msg *pMsg) {
 
 
 void RecvMsg(int iRecv, struct msg *pMsg) { // msg as ptr, C/C++
-    sem_wait(&psem[iRecv]);
+    sem_wait(&csem[iRecv]);
     pMsg->value = mailboxes[iRecv].value;
-    sem_post(&csem[iRecv]);
+    sem_post(&psem[iRecv]);
 }
 
 
@@ -48,8 +48,9 @@ void* adder(void* argv){
     start = time(NULL);
     int mailbox_index = (long) argv;
 
+//    cout << "Started Thread " << mailbox_index << endl;
     // Malloc and then enter 0s to clear garbage data malloc designated
-    msg* my_message = static_cast<msg*>(malloc(sizeof(struct msg)));
+    msg* my_message = (msg*)(malloc(sizeof(struct msg)));
     my_message->iFrom = 0;
     my_message->value = 0;
     my_message->cnt = 0;
@@ -74,30 +75,35 @@ void* adder(void* argv){
 }
 
 
-void InitMailBox(int num_mailboxes, pthread_t * threads){
+void InitMailBox(int num_mailboxes, pthread_t* threads){
     // add 1 to the total number of mailboxes because main thread
-    mailboxes = static_cast<msg*>(malloc(num_mailboxes+1 * sizeof(struct msg)));
-    threads = static_cast<pthread_t *>(malloc(num_mailboxes * sizeof(pthread_t)));
-    psem = static_cast<sem_t *>(malloc(num_mailboxes+1 * sizeof(sem_t)));
-    csem = static_cast<sem_t *>(malloc(num_mailboxes+1 * sizeof(sem_t)));
+    mailboxes = (msg*)(malloc(num_mailboxes+1 * sizeof(struct msg)));
+    threads = (pthread_t*)malloc((sizeof(pthread_t) * num_mailboxes));
+    psem = (sem_t *)(malloc(num_mailboxes+1 * sizeof(sem_t)));
+    csem = (sem_t *)(malloc(num_mailboxes+1 * sizeof(sem_t)));
 
+    //Threads are initialized and psem + csem for all threads but the last.
     for(int i = 1; i <= num_mailboxes; i++){
-        sem_init(&psem[i], 0, 1);
-        sem_init(&csem[i], 0, 0);
+        sem_init(&psem[i-1], 0, 1);
+        sem_init(&csem[i-1], 0, 0);
         // https://stackoverflow.com/questions/6990888/c-how-to-create-thread-using-pthread-create-function
-        if (!(pthread_create(&threads[i], NULL, adder, (void *) i))){
+        if ((pthread_create(&threads[i-1], NULL, adder, (void *) i)) != 0){
             cout << "Issue creating thread " << i << ". Exiting.";
             exit(1);
         }
     }
+    //Initialize the last psem and csem.
+    sem_init(&psem[num_mailboxes], 0, 1);
+    sem_init(&csem[num_mailboxes], 0, 0);
+    return;
 }
 
 
 int main(int argc, char *argv[]) {
     int num_mailboxes, value, destination, scan_return;
-    pthread_t * threads;
-    msg* msg;
+    pthread_t* threads;
     char input[MAX_CHAR];
+    struct msg* a_msg = (msg*)malloc(sizeof(struct msg));
 
     if (!(argc == 2)){
         cout << "You entered an invalid number of arguments. Refer to the readme." << endl;
@@ -116,40 +122,35 @@ int main(int argc, char *argv[]) {
         num_mailboxes = 10;
     }
 
-    cout << "Program initialized with " << num_mailboxes << " mailboxes. Enter two integers between 1 and "
-    << num_mailboxes << " separated by a space (value destination_thread)."
-                        " Enter nonsense to end program and print statistics." << endl;
-
     InitMailBox(num_mailboxes, threads);
-    sem_init(&psem[0], 0, 1);
-    sem_init(&csem[0], 0, 0);
+
+    cout << "Program initialized with " << num_mailboxes << " mailboxes. Enter two integers between 1 and "
+         << num_mailboxes << " separated by a space (value destination_thread)."
+                             " Enter nonsense to end program and print statistics." << endl;
 
     while(1){
         fgets(input, MAX_CHAR, stdin);
         scan_return = sscanf(input, "%d %d", &value, &destination);
-        if (!((value >= 1 && value <= num_mailboxes) && (destination >= 1 && destination <= num_mailboxes))) {
-            cout << "Please enter a number between 1 and " << num_mailboxes << endl;
-            continue;
-        }
+
         // check if we scanned in 2 elements or if time to exit
         if (scan_return != 2){
             cout << "Beginning termination" << endl;
-            msg -> iFrom = 0;
-            msg -> value = -1;
-            msg -> cnt = 0;
-            msg -> tot = 0;
+            a_msg -> iFrom = 0;
+            a_msg -> value = -1;
+            a_msg -> cnt = 0;
+            a_msg -> tot = 0;
 
             for (int i = 1; i <= num_mailboxes; i++){
-                SendMsg(i, msg);
+                SendMsg(i, a_msg);
             }
 
             for (int i = 1; i <= num_mailboxes; i++){
-                RecvMsg(i, msg);
+                RecvMsg(i, a_msg);
                 cout << "The result from thread "
-                        << msg -> iFrom << " is "
-                        << msg -> value << " from "
-                        << msg -> cnt << " operations during "
-                        << msg -> tot <<" secs." << endl;
+                     << a_msg -> iFrom << " is "
+                     << a_msg -> value << " from "
+                     << a_msg -> cnt << " operations during "
+                     << a_msg -> tot << " secs." << endl;
             }
 
             for (int i = 0; i <= num_mailboxes; i++){
@@ -160,14 +161,17 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        msg -> iFrom = 0;
-        msg -> value = value;
-        msg -> cnt = 0;
-        msg -> tot = 0;
+        if (!((value >= 1 && value <= num_mailboxes) && (destination >= 1 && destination <= num_mailboxes))) {
+            cout << "Please enter a number between 1 and " << num_mailboxes << endl;
+            continue;
+        }
 
-        SendMsg(destination, msg);
+        a_msg -> iFrom = 0;
+        a_msg -> value = value;
+        a_msg -> cnt = 0;
+        a_msg -> tot = 0;
 
-
+        SendMsg(destination, a_msg);
     }
 
 }
