@@ -27,8 +27,7 @@ struct msg* mailboxes;
 
 void SendMsg(int iTo, struct msg *pMsg) {
     sem_wait(&psem[iTo]);
-    cout << "got here sending to " << iTo << endl;
-
+//    cout << "got here sending to " << iTo << endl;
     mailboxes[iTo].iFrom = pMsg->iFrom;
     mailboxes[iTo].value = pMsg->value;
     mailboxes[iTo].cnt = pMsg->cnt;
@@ -39,7 +38,7 @@ void SendMsg(int iTo, struct msg *pMsg) {
 
 void RecvMsg(int iRecv, struct msg *pMsg) { // msg as ptr, C/C++
     sem_wait(&csem[iRecv]);
-    cout << "Thread " << iRecv << " got message with value " << mailboxes[iRecv].value << endl;
+//    cout << "Thread " << iRecv << " got message with value " << mailboxes[iRecv].value << endl;
     pMsg->iFrom = mailboxes[iRecv].iFrom;
     pMsg->value = mailboxes[iRecv].value;
     pMsg->cnt = mailboxes[iRecv].cnt;
@@ -54,10 +53,8 @@ void* adder(void* argv){
     time_t start, end;
     start = time(NULL);
     int mailbox_index = (long) argv;
-
-//    cout << "Started Thread " << mailbox_index << endl;
-    // Malloc and then enter 0s to clear garbage data malloc designated
     struct msg my_message;
+
     my_message.iFrom = 0;
     my_message.value = 0;
     my_message.cnt = 0;
@@ -84,8 +81,6 @@ void* adder(void* argv){
             my_message.cnt = my_count;
             my_message.tot = time(NULL)-start;
             SendMsg(0, &my_message);
-//            free(my_message);
-            cout << "thread deleted" << mailbox_index << endl;
 
             return 0;
         }
@@ -116,7 +111,6 @@ void InitMailBox(int num_mailboxes, pthread_t* threads){
             exit(1);
         }
     }
-    //Initialize the last psem and csem.
     return;
 }
 
