@@ -24,6 +24,21 @@ sem_t* csem; /* pointers to consumers (receivers) */
 struct msg* mailboxes;
 
 
+/*
+ * TODO implement try_wait sendmsg and return
+ */
+int NBSendMsg(int iTo, struct msg* pMsg){
+    if (sem_trywait(&psem[iTo]) == 0){
+        mailboxes[iTo].iFrom = pMsg->iFrom;
+        mailboxes[iTo].value = pMsg->value;
+        mailboxes[iTo].cnt = pMsg->cnt;
+        mailboxes[iTo].tot = pMsg->tot;
+        sem_post(&csem[iTo]);
+        return 0;
+    }else
+        return -1;
+}
+
 void SendMsg(int iTo, struct msg *pMsg) {
     sem_wait(&psem[iTo]);
 //    cout << "got here sending to " << iTo << endl;
@@ -115,7 +130,7 @@ void InitMailBox(int num_mailboxes, pthread_t* threads){
 
 
 int main(int argc, char *argv[]) {
-    int num_mailboxes, value, destination, scan_return, terminate;
+    int num_mailboxes, value, destination, scan_return, terminate, nb = 0, nb_return;
     char input[MAX_CHAR];
     // https://stackoverflow.com/questions/11168519/fscanf-or-fgets-reading-a-file-line-after-line
     // Got file input from that link
@@ -152,6 +167,12 @@ int main(int argc, char *argv[]) {
     if (num_mailboxes > MAX_THREADS){
         cout << "Too many threads specified. Using the maximum of 10" << endl;
         num_mailboxes = 10;
+    }
+
+
+    if (argc == 4 && argv[3] == "nb"){
+        cout << "NB mode activated. All unsent messages will be sent upon termination";
+        nb = 1;
     }
 
     pthread_t threads[num_mailboxes];
@@ -216,7 +237,14 @@ int main(int argc, char *argv[]) {
         a_msg -> cnt = 0;
         a_msg -> tot = 0;
 
-        SendMsg(destination, a_msg);
+        if (nb)
+            nb_return = NBSendMsg(destination, a_msg);
+        else
+            SendMsg(destination, a_msg);
+
+        if (nb_return == -1){
+            NBQueue.push(struct msg_node aNode(value, destination));
+        }
         scan_return = sscanf(input, "%d %d", &value, &destination);
     }
 
