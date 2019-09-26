@@ -88,7 +88,7 @@ void* adder(void* argv){
             mailboxes[mailbox_index].tot = 0;
             sleep(1);
         }
-        // Terminate Thread because value less than -1 received.
+            // Terminate Thread because value less than -1 received.
         else{
             my_message.iFrom = mailbox_index;
             my_message.value = my_val;
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    if (!(argc < 3)){
+    if ((argc < 3)){
         cout << "You entered an invalid number of arguments. Refer to the readme. \n "
                 "Required arguments \"$./proj3 #threads filename.txt\". \"nb\" argument optional." <<endl;
         return -1;
@@ -188,14 +188,14 @@ int main(int argc, char *argv[]) {
     if (fp == NULL)
     {
         cout << "Error opening the file" << endl;
-        exit(EXIT_FAILURE);
+        exit(1);
     }
-
-    scan_return = fscanf(fp, "%d %d\n", &value, destination);
 
     terminate = 0;
     while(1){
-//        fgets(input, MAX_CHAR, stdin);
+        if(fgets(input, MAX_CHAR, fp) == NULL)
+            terminate = 1;
+        scan_return = sscanf(input, "%d %d\n", &value, &destination);
 
         // check to see if we got 2 elements
         if (scan_return != 2 || scan_return == EOF)
@@ -243,9 +243,9 @@ int main(int argc, char *argv[]) {
             SendMsg(destination, a_msg);
 
         if (nb_return == -1){
-            NBQueue.push(struct msg_node aNode(value, destination));
+            struct msg_node aNode(value, destination);
+            NBQueue.push(aNode);
         }
-        scan_return = sscanf(input, "%d %d", &value, &destination);
     }
 
 }
