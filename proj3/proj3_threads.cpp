@@ -7,12 +7,11 @@ using namespace std;
 #include <pthread.h>
 #include <semaphore.h>
 #include <time.h>
-#include <string.h>
 #include <unistd.h>
-#include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "msg.h"
+#include "helper_structs.h"
+#include <queue>
 
 #define REQUEST 1
 #define REPLY 2
@@ -123,6 +122,18 @@ int main(int argc, char *argv[]) {
     FILE *fp;
     struct msg* a_msg = (msg*)malloc(sizeof(struct msg));
     struct msg* term_msg = (msg*)malloc(sizeof(struct msg));
+    queue <struct msg_node> NBQueue;
+
+    for (int i = 0; i < 5; i++){
+        NBQueue.push( msg_node(i+4, i+5));
+    }
+
+    cout << "printing queue" << endl;
+    for (int i = 0; i < 5; i++){
+        msg_node aNode = NBQueue.front();
+        cout << aNode.iTo << " " << aNode.value << endl;
+        NBQueue.pop();
+    }
 
 
     if (!(argc < 3)){
