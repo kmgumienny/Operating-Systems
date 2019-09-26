@@ -118,11 +118,16 @@ void InitMailBox(int num_mailboxes, pthread_t* threads){
 int main(int argc, char *argv[]) {
     int num_mailboxes, value, destination, scan_return, terminate;
     char input[MAX_CHAR];
+    // https://stackoverflow.com/questions/11168519/fscanf-or-fgets-reading-a-file-line-after-line
+    // Got file input from that link
+    FILE *fp;
     struct msg* a_msg = (msg*)malloc(sizeof(struct msg));
     struct msg* term_msg = (msg*)malloc(sizeof(struct msg));
 
-    if (!(argc == 2)){
-        cout << "You entered an invalid number of arguments. Refer to the readme." << endl;
+
+    if (!(argc < 3)){
+        cout << "You entered an invalid number of arguments. Refer to the readme. \n "
+                "Required arguments \"$./proj3 #threads filename.txt\". \"nb\" argument optional." <<endl;
         return -1;
     }
 
@@ -130,7 +135,7 @@ int main(int argc, char *argv[]) {
         num_mailboxes = atoi(argv[1]);
     } catch (const std::exception& e) { // caught by reference to base
         std::cout << " Error regarding # mailboxes. Error reads: '"
-                  << e.what() << "'\n";
+                  << e.what() << endl;
     }
 
     if (num_mailboxes > MAX_THREADS){
@@ -142,17 +147,26 @@ int main(int argc, char *argv[]) {
 
     InitMailBox(num_mailboxes, threads);
 
-    cout << "Program initialized with " << num_mailboxes << " mailboxes. Enter two integers between 1 and "
-         << num_mailboxes << " separated by a space (value destination_thread)."
-                             " Enter nonsense to end program and print statistics." << endl;
+    cout << "Program initialized with " << num_mailboxes << " mailboxes. ";
+    //"Enter two integers between 1 and " << num_mailboxes << " separated by a space (value destination_thread)."
+    //                         " Enter nonsense to end program and print statistics." << endl;
+
+    fp = fopen(argv[2], "r");
+
+    if (fp == NULL)
+    {
+        cout << "Error opening the file" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    scan_return = fscanf(fp, "%d %d\n", &value, destination);
 
     terminate = 0;
     while(1){
-        fgets(input, MAX_CHAR, stdin);
-        scan_return = sscanf(input, "%d %d", &value, &destination);
+//        fgets(input, MAX_CHAR, stdin);
 
         // check to see if we got 2 elements
-        if (scan_return != 2)
+        if (scan_return != 2 || scan_return == EOF)
             terminate = 1;
         if ((!(destination >= 1 && destination <= num_mailboxes)) && !terminate) {
             cout << "Please enter a destination value between 1 and " << num_mailboxes << endl;
@@ -192,6 +206,7 @@ int main(int argc, char *argv[]) {
         a_msg -> tot = 0;
 
         SendMsg(destination, a_msg);
+        scan_return = sscanf(input, "%d %d", &value, &destination);
     }
 
 }
