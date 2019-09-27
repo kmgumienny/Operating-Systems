@@ -1,0 +1,86 @@
+Script started on 2019-09-26 21:05:13-0400
+]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj3[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj3[00m$ make
+g++ -o proj3 proj3_threads.cpp -lpthread
+[01m[Kproj3_threads.cpp:[m[K In function ‘[01m[Kvoid InitMailBox(int, pthread_t*)[m[K’:
+[01m[Kproj3_threads.cpp:113:64:[m[K [01;35m[Kwarning: [m[Kcast to pointer from integer of different size [[01;35m[K-Wint-to-pointer-cast[m[K]
+         if ((pthread_create(&threads[i], NULL, adder, (void *) [01;35m[Kx[m[K)) != 0){
+                                                                [01;35m[K^[m[K
+]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj3[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj3[00m$ ./project[K[K[K[Kj3 5 values.tx 
+t
+Program initialized with 5 mailboxes. 
+Beginning termination
+The result from thread 1 is 14 from 3 operations during 21 secs.
+The result from thread 2 is 22 from 3 operations during 21 secs.
+The result from thread 3 is 53 from 15 operations during 21 secs.
+The result from thread 4 is 0 from 0 operations during 21 secs.
+The result from thread 5 is 42 from 14 operations during 23 secs.
+]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj3[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj3[00m$ ./proj3 5 values.tx 
+t nb
+NB mode activated. All unsent messages will be sent upon terminationProgram initialized with 5 mailboxes. 
+Message to 1 with value 6 could not be delivered. Queued.
+Message to 1 with value 5 could not be delivered. Queued.
+Message to 2 with value 9 could not be delivered. Queued.
+Message to 3 with value 7 could not be delivered. Queued.
+Message to 3 with value 3 could not be delivered. Queued.
+Message to 3 with value 3 could not be delivered. Queued.
+Message to 3 with value 3 could not be delivered. Queued.
+Message to 3 with value 3 could not be delivered. Queued.
+Message to 3 with value 3 could not be delivered. Queued.
+Message to 5 with value 3 could not be delivered. Queued.
+Message to 3 with value 3 could not be delivered. Queued.
+Message to 3 with value 3 could not be delivered. Queued.
+Message to 5 with value 3 could not be delivered. Queued.
+Message to 3 with value 3 could not be delivered. Queued.
+Message to 3 with value 3 could not be delivered. Queued.
+Message to 3 with value 3 could not be delivered. Queued.
+Message to 3 with value 3 could not be delivered. Queued.
+Message to 5 with value 3 could not be delivered. Queued.
+Message to 3 with value 3 could not be delivered. Queued.
+Message to 5 with value 3 could not be delivered. Queued.
+Message to 5 with value 3 could not be delivered. Queued.
+Message to 5 with value 3 could not be delivered. Queued.
+Message to 5 with value 3 could not be delivered. Queued.
+Message to 5 with value 3 could not be delivered. Queued.
+Message to 5 with value 3 could not be delivered. Queued.
+Message to 5 with value 3 could not be delivered. Queued.
+Message to 5 with value 3 could not be delivered. Queued.
+Message to 5 with value 3 could not be delivered. Queued.
+Message to 1 with value 6 delivered from queue.
+Message to 1 with value 5 delivered from queue.
+Message to 2 with value 9 delivered from queue.
+Message to 3 with value 7 delivered from queue.
+Message to 3 with value 3 delivered from queue.
+Message to 3 with value 3 delivered from queue.
+Message to 3 with value 3 delivered from queue.
+Message to 3 with value 3 delivered from queue.
+Message to 3 with value 3 delivered from queue.
+Message to 5 with value 3 delivered from queue.
+Message to 3 with value 3 delivered from queue.
+Message to 3 with value 3 delivered from queue.
+Message to 5 with value 3 delivered from queue.
+Message to 3 with value 3 delivered from queue.
+Message to 3 with value 3 delivered from queue.
+Message to 3 with value 3 delivered from queue.
+Message to 3 with value 3 delivered from queue.
+Message to 5 with value 3 delivered from queue.
+Message to 3 with value 3 delivered from queue.
+Message to 5 with value 3 delivered from queue.
+Message to 5 with value 3 delivered from queue.
+Message to 5 with value 3 delivered from queue.
+Message to 5 with value 3 delivered from queue.
+Message to 5 with value 3 delivered from queue.
+Message to 5 with value 3 delivered from queue.
+Message to 5 with value 3 delivered from queue.
+Message to 5 with value 3 delivered from queue.
+Message to 5 with value 3 delivered from queue.
+Beginning termination
+The result from thread 1 is 14 from 3 operations during 20 secs.
+The result from thread 2 is 22 from 3 operations during 20 secs.
+The result from thread 3 is 53 from 15 operations during 20 secs.
+The result from thread 4 is 0 from 0 operations during 20 secs.
+The result from thread 5 is 42 from 14 operations during 22 secs.
+]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj3[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj3[00m$ make clean
+rm proj3
+]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj3[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj3[00m$ exit
+
+Script done on 2019-09-26 21:07:12-0400
