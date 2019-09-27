@@ -76,7 +76,7 @@ void* adder(void* argv){
 
     while(1) {
         RecvMsg(mailbox_index, &my_message);
-        
+
         if (my_message.value != -1) {
             my_count += 1;
             my_val += my_message.value;
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
         if (scan_return != 2 || scan_return == EOF)
             terminate = 1;
         if ((!(destination >= 1 && destination <= num_mailboxes)) && !terminate) {
-            cout << "Please enter a destination value between 1 and " << num_mailboxes << endl;
+            cout << "Skipping message. Destination value must be between 1 and " << num_mailboxes << endl;
             continue;
         }
 
@@ -201,9 +201,9 @@ int main(int argc, char *argv[]) {
                 sem_destroy(&csem[i]);
                 sem_destroy(&psem[i]);
             }
-            
+
             return 0;
-            
+
         }else if (terminate == 1 && nb_terminate == 0){
             while(!NBQueue.empty()) {
                 struct msg_node aNode = NBQueue.front();
