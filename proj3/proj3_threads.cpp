@@ -12,6 +12,7 @@ using namespace std;
 #include <stdio.h>
 #include "helper_structs.h"
 #include <queue>
+#include <cstring>
 
 #define REQUEST 1
 #define REPLY 2
@@ -41,7 +42,6 @@ int NBSendMsg(int iTo, struct msg* pMsg){
 
 void SendMsg(int iTo, struct msg *pMsg) {
     sem_wait(&psem[iTo]);
-//    cout << "got here sending to " << iTo << endl;
     mailboxes[iTo].iFrom = pMsg->iFrom;
     mailboxes[iTo].value = pMsg->value;
     mailboxes[iTo].cnt = pMsg->cnt;
@@ -52,7 +52,6 @@ void SendMsg(int iTo, struct msg *pMsg) {
 
 void RecvMsg(int iRecv, struct msg *pMsg) { // msg as ptr, C/C++
     sem_wait(&csem[iRecv]);
-//    cout << "Thread " << iRecv << " got message with value " << mailboxes[iRecv].value << endl;
     pMsg->iFrom = mailboxes[iRecv].iFrom;
     pMsg->value = mailboxes[iRecv].value;
     pMsg->cnt = mailboxes[iRecv].cnt;
@@ -62,7 +61,6 @@ void RecvMsg(int iRecv, struct msg *pMsg) { // msg as ptr, C/C++
 
 
 void* adder(void* argv){
-    // cast to long here to avoid losing information (can't cast int).
     int my_val, my_count;
     time_t start, end;
     start = time(NULL);
@@ -78,7 +76,7 @@ void* adder(void* argv){
 
     while(1) {
         RecvMsg(mailbox_index, &my_message);
-
+        
         if (my_message.value != -1) {
             my_count += 1;
             my_val += my_message.value;
@@ -87,15 +85,12 @@ void* adder(void* argv){
             mailboxes[mailbox_index].cnt = 0;
             mailboxes[mailbox_index].tot = 0;
             sleep(1);
-        }
-            // Terminate Thread because value less than -1 received.
-        else{
+        }else{
             my_message.iFrom = mailbox_index;
             my_message.value = my_val;
             my_message.cnt = my_count;
             my_message.tot = time(NULL)-start;
             SendMsg(0, &my_message);
-
             return 0;
         }
     }
@@ -103,20 +98,15 @@ void* adder(void* argv){
 
 
 void InitMailBox(int num_mailboxes, pthread_t* threads){
-    // add 1 to the total number of mailboxes because main thread
-//    threads = (pthread_t*)malloc((sizeof(pthread_t) * num_mailboxes));
     mailboxes = (struct msg*)(malloc((num_mailboxes + 1) * sizeof(struct msg)));
     psem = (sem_t *)(malloc((num_mailboxes+1) * sizeof(sem_t)));
     csem = (sem_t *)(malloc((num_mailboxes+1) * sizeof(sem_t)));
 
     for (int i = 0; i <= num_mailboxes; i++){
-//        mailboxes[i] = (struct msg*)malloc(sizeof(struct msg));
-//        threads[i] = (pthread_t)malloc(sizeof(pthread_t));
         sem_init(&psem[i], 0, 1);
         sem_init(&csem[i], 0, 0);
     }
 
-    //Threads are initialized and psem + csem for all threads but the last.
     for(int i = 0; i < num_mailboxes; i++){
         int x = i+1;
         // https://stackoverflow.com/questions/6990888/c-how-to-create-thread-using-pthread-create-function
@@ -130,26 +120,12 @@ void InitMailBox(int num_mailboxes, pthread_t* threads){
 
 
 int main(int argc, char *argv[]) {
-    int num_mailboxes, value, destination, scan_return, terminate, nb = 0, nb_return;
+    int num_mailboxes, value, destination, scan_return, terminate, nb_terminate, nb, nb_return;
     char input[MAX_CHAR];
-    // https://stackoverflow.com/questions/11168519/fscanf-or-fgets-reading-a-file-line-after-line
-    // Got file input from that link
     FILE *fp;
     struct msg* a_msg = (msg*)malloc(sizeof(struct msg));
     struct msg* term_msg = (msg*)malloc(sizeof(struct msg));
     queue <struct msg_node> NBQueue;
-
-    for (int i = 0; i < 5; i++){
-        NBQueue.push( msg_node(i+4, i+5));
-    }
-
-    cout << "printing queue" << endl;
-    for (int i = 0; i < 5; i++){
-        msg_node aNode = NBQueue.front();
-        cout << aNode.iTo << " " << aNode.value << endl;
-        NBQueue.pop();
-    }
-
 
     if ((argc < 3)){
         cout << "You entered an invalid number of arguments. Refer to the readme. \n "
@@ -162,6 +138,7 @@ int main(int argc, char *argv[]) {
     } catch (const std::exception& e) { // caught by reference to base
         std::cout << " Error regarding # mailboxes. Error reads: '"
                   << e.what() << endl;
+        exit(-1);
     }
 
     if (num_mailboxes > MAX_THREADS){
@@ -169,35 +146,32 @@ int main(int argc, char *argv[]) {
         num_mailboxes = 10;
     }
 
-
-    if (argc == 4 && argv[3] == "nb"){
+    if (argc == 4){
         cout << "NB mode activated. All unsent messages will be sent upon termination";
         nb = 1;
-    }
+    } else
+        nb = 0;
 
+
+    terminate = 0;
+    nb_terminate = 0;
     pthread_t threads[num_mailboxes];
-
     InitMailBox(num_mailboxes, threads);
-
-    cout << "Program initialized with " << num_mailboxes << " mailboxes. ";
-    //"Enter two integers between 1 and " << num_mailboxes << " separated by a space (value destination_thread)."
-    //                         " Enter nonsense to end program and print statistics." << endl;
+    cout << "Program initialized with " << num_mailboxes << " mailboxes. " << endl;
 
     fp = fopen(argv[2], "r");
-
     if (fp == NULL)
     {
         cout << "Error opening the file" << endl;
         exit(1);
     }
 
-    terminate = 0;
+
     while(1){
         if(fgets(input, MAX_CHAR, fp) == NULL)
             terminate = 1;
         scan_return = sscanf(input, "%d %d\n", &value, &destination);
 
-        // check to see if we got 2 elements
         if (scan_return != 2 || scan_return == EOF)
             terminate = 1;
         if ((!(destination >= 1 && destination <= num_mailboxes)) && !terminate) {
@@ -205,8 +179,7 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        // check if time to exit
-        if (terminate){
+        if (terminate && nb_terminate == 1){
             cout << "Beginning termination" << endl;
             term_msg -> iFrom = 0;
             term_msg -> value = -1;
@@ -222,14 +195,31 @@ int main(int argc, char *argv[]) {
                      << a_msg -> cnt << " operations during "
                      << a_msg -> tot << " secs." << endl;
                 (void)pthread_join(threads[i-1], NULL);
-
             }
 
             for (int i = 0; i <= num_mailboxes; i++){
                 sem_destroy(&csem[i]);
                 sem_destroy(&psem[i]);
             }
+            
             return 0;
+            
+        }else if (terminate == 1 && nb_terminate == 0){
+            while(!NBQueue.empty()) {
+                struct msg_node aNode = NBQueue.front();
+                a_msg->iFrom = 0;
+                a_msg->value = aNode.value;
+                a_msg->cnt = 0;
+                a_msg->tot = 0;
+                nb_return = NBSendMsg(aNode.iTo, a_msg);
+                if (nb_return == 0){
+                    cout << "Message to " << aNode.iTo << " with value " << aNode.value
+                         << " delivered from queue." << endl;
+                    NBQueue.pop();
+                }
+            }
+            nb_terminate = 1;
+            continue;
         }
 
         a_msg -> iFrom = 0;
@@ -243,10 +233,10 @@ int main(int argc, char *argv[]) {
             SendMsg(destination, a_msg);
 
         if (nb_return == -1){
-            struct msg_node aNode(value, destination);
+            cout << "Message to " << destination << " with value " << value
+            << " could not be delivered. Queued." << endl;
+            struct msg_node aNode(destination, value);
             NBQueue.push(aNode);
         }
     }
-
 }
-
