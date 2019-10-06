@@ -1,6 +1,6 @@
 CFLAGS = -o
 
-all: proj3_server.cpp
+all: proj4_server.cpp
 	g++ $(CFLAGS) proj4 proj4_server.cpp
 
 clean:
