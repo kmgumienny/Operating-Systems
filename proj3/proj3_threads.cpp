@@ -120,16 +120,17 @@ void InitMailBox(int num_mailboxes, pthread_t* threads){
 
 
 int main(int argc, char *argv[]) {
-    int num_mailboxes, value, destination, scan_return, terminate, nb_terminate, nb, nb_return;
+    int num_mailboxes, value, destination, scan_return, terminate, read_from_file, nb_terminate, nb, nb_return;
     char input[MAX_CHAR];
     FILE *fp;
     struct msg* a_msg = (msg*)malloc(sizeof(struct msg));
     struct msg* term_msg = (msg*)malloc(sizeof(struct msg));
     queue <struct msg_node> NBQueue;
 
-    if ((argc < 3)){
+    if ((argc < 2)){
         cout << "You entered an invalid number of arguments. Refer to the readme. \n "
-                "Required arguments \"$./proj3 #threads filename.txt\". \"nb\" argument optional." <<endl;
+                "Required arguments \"$./proj3 #threads\". or \"$./proj3 #threads filename.txt\". "
+                "\"nb\" argument following either input mode is optional." <<endl;
         return -1;
     }
 
@@ -146,7 +147,7 @@ int main(int argc, char *argv[]) {
         num_mailboxes = 10;
     }
 
-    if (argc == 4){
+    if (strcmp(argv[argc-1], "nb") == 0){
         cout << "NB mode activated. All unsent messages will be sent upon termination";
         nb = 1;
     } else
@@ -159,17 +160,28 @@ int main(int argc, char *argv[]) {
     InitMailBox(num_mailboxes, threads);
     cout << "Program initialized with " << num_mailboxes << " mailboxes. " << endl;
 
-    fp = fopen(argv[2], "r");
-    if (fp == NULL)
-    {
-        cout << "Error opening the file" << endl;
-        exit(1);
-    }
+    // If the program cannot open a file, it will accept input from stdin
+    if ((argc > 2 && !nb) || (argc > 3 && nb)) {
+        if (nb)
+            fp = fopen(argv[argc-2], "r");
+        else
+            fp = fopen(argv[argc-1], "r");
+        if (fp == NULL) {
+            cout << "Error opening the file" << endl;
+            exit(1);
+        } else
+            read_from_file = 1;
+    } else
+        read_from_file = 0;
 
 
     while(1){
-        if(fgets(input, MAX_CHAR, fp) == NULL)
-            terminate = 1;
+        if (read_from_file == 1) {
+            if (fgets(input, MAX_CHAR, fp) == NULL)
+                terminate = 1;
+        }else if (!terminate)
+            fgets(input, MAX_CHAR, stdin);
+
         scan_return = sscanf(input, "%d %d\n", &value, &destination);
 
         if (scan_return != 2 || scan_return == EOF)
