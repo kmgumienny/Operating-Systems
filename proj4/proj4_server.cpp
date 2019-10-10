@@ -13,6 +13,7 @@ using namespace std;
 #include <string.h>
 #include <bits/ios_base.h>
 #include <fstream>
+#include <iomanip>
 
 #define MAX_BUFFER 256
 #define MAX_THREADS 15
@@ -44,11 +45,15 @@ int check_is_textfile(char *file_name) {
     if (is) {
         while (!is.eof()) {
             is.read(char_buf, sizeof(char));
-            if (isprint(*char_buf) == 0 && isspace(*char_buf) == 0)
+            if (isprint(*char_buf) == 0 && isspace(*char_buf) == 0) {
+                free(char_buf);
+                is.close();
                 return 0;
+            }
         }
     }
     free(char_buf);
+    is.close();
     return 1;
 }
 
@@ -99,21 +104,22 @@ void *thread_process(void *thread_num) {
 }
 
 int main(int argc, char *argv[]) {
-    int thread_status, total_threads_ran = 0, this_thread_iteration = 0;
+    int total_threads_ran = 0, this_thread_iteration = 0;
     pthread_t *threads;
-    struct rusage process_info;
-    struct timeval start, end;
+    struct rusage usage;
+    struct timeval clock_before, clock_after, user_start_time, user_end_time, system_start_time, system_end_time, result_time;
     struct stat *statbuf;
     statbuf = (struct stat *) malloc(sizeof(struct stat));
     FILE *fp;
     char *file_buffer = (char *) malloc(sizeof(char) * MAX_BUFFER);
     size_t buffer_size = MAX_BUFFER;
 
-    fp = fopen("devs.txt", "r");
-    if (fp == NULL) {
-        cout << "Error opening the file" << endl;
-        exit(1);
-    }
+    // FOR TESTING
+//    fp = fopen("devs.txt", "r");
+//    if (fp == NULL) {
+//        cout << "Error opening the file" << endl;
+//        exit(1);
+//    }
 
     bad_files = 0;
     directories = 0;
@@ -122,10 +128,17 @@ int main(int argc, char *argv[]) {
     regular_file_size = 0;
     text_files = 0;
     text_file_size = 0;
+    gettimeofday(&clock_before, NULL);
+    getrusage(RUSAGE_SELF, &usage);
+    user_start_time = usage.ru_utime;
+    system_start_time = usage.ru_stime;
+
 
     // Run the serial version of the program
     if (argc == 1) {
-        while (getline(&file_buffer, &buffer_size, fp) != -1) {
+        // FOR TESTING
+//        while (getline(&file_buffer, &buffer_size, fp) != -1) {
+        while (getline(&file_buffer, &buffer_size, stdin) != -1) {
             // remove newline character and replace with null terminator for stat
             file_buffer[strlen(file_buffer) - 1] = '\0';
 
@@ -176,7 +189,10 @@ int main(int argc, char *argv[]) {
             sem_init(&semaphores[i], 0, 1);
         }
 
-        while (getline(&file_buffer, &buffer_size, fp) != -1) {
+        // FOR TESTING
+//        while (getline(&file_buffer, &buffer_size, fp) != -1) {
+
+        while (getline(&file_buffer, &buffer_size, stdin) != -1) {
             // remove newline character and replace with null terminator for stat
             file_buffer[strlen(file_buffer) - 1] = '\0';
             this_thread_iteration = total_threads_ran % num_threads;
@@ -218,6 +234,19 @@ int main(int argc, char *argv[]) {
         free(list_files[i]);
     }
 
+    gettimeofday(&clock_after, NULL);
+    getrusage(RUSAGE_SELF, &usage);
+    user_end_time = usage.ru_utime;
+    system_end_time = usage.ru_stime;
+
+    timersub(&clock_after, &clock_before,  &result_time);
+    cout <<"Wall clock time: " << (double)(result_time.tv_usec + result_time.tv_sec * 1000000) << " Microseconds" << endl;
+    timersub(&user_end_time, &user_start_time,  &result_time);
+    cout <<"User CPU time: " << (double)(result_time.tv_usec + result_time.tv_sec * 1000000) << " Microseconds" << endl;
+    timersub(&system_end_time, &system_start_time, &result_time);
+    cout <<"System CPU time: " << (double)(result_time.tv_usec + result_time.tv_sec * 1000000) << " Microseconds" << endl;
+
+
     cout << "Bad Files: " << bad_files << endl;
     cout << "Directories: " << directories << endl;
     cout << "Regular Files: " << regular_files << endl;
@@ -225,7 +254,8 @@ int main(int argc, char *argv[]) {
     cout << "Regular File Bytes: " << regular_file_size << endl;
     cout << "Text Files: " << text_files << endl;
     cout << "Text File Bytes: " << text_file_size << endl;
-    fclose(fp);
+    // FOR TESTING
+    //    fclose(fp);
 
     free(list_files);
     free(semaphores);

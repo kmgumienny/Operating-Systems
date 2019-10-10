@@ -1,0 +1,63 @@
+Script started on 2019-10-10 12:01:25-0400
+]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj4[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj4[00m$ make
+g++ -o proj4 proj4_server.cpp -lpthread
+[01m[Kproj4_server.cpp:[m[K In function ‘[01m[Kint main(int, char**)[m[K’:
+[01m[Kproj4_server.cpp:207:96:[m[K [01;35m[Kwarning: [m[Kcast to pointer from integer of different size [[01;35m[K-Wint-to-pointer-cast[m[K]
+ ate(&threads[this_thread_iteration], NULL, thread_process, (void *) [01;35m[Kthis_thread_iteration[m[K)) {
+                                                                     [01;35m[K^~~~~~~~~~~~~~~~~~~~~[m[K
+]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj4[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj4[00m$ make cleanls -1d /etc/* | ./prroj4 thread 10[C[C[C[C[K[A]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj4[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj4[00m$ [C[C[C[C[C[C[C[Cbin
+[C[C[C[C thread 10[C[C[C[C[K[A]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj4[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj4[00m$ make[K
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cls -1d /bin/* | ./prroj4
+Wall clock time: 12404 Microseconds
+User CPU time: 11849 Microseconds
+System CPU time: 0 Microseconds
+Bad Files: 0
+Directories: 0
+Regular Files: 163
+Special Files: 0
+Regular File Bytes: 18488904
+Text Files: 28
+Text File Bytes: 81008
+]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj4[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj4[00m$ ls -1d /bin/* | ./prroj4[A]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj4[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj4[00m$ make[K
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C cleanls -1d /etc/* | ./prroj4 thread 10[C[C[C[C[K[A]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj4[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj4[00m$ [C[C[C[C[C[C[C[Cbin
+[C[C[C[C thread 10
+Running in thread mode with 10 threads.
+Wall clock time: 12842 Microseconds
+User CPU time: 15948 Microseconds
+System CPU time: 12680 Microseconds
+Bad Files: 0
+Directories: 0
+Regular Files: 163
+Special Files: 0
+Regular File Bytes: 18488904
+Text Files: 28
+Text File Bytes: 81008
+]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj4[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj4[00m$ ls -1d /bin/* | ./prroj4 thread 10[C[C[C[C[K[A]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj4[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj4[00m$ make[K
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C cleanls -1d /etc/* | ./prroj4 thread 10[C[C[C[C[K
+Wall clock time: 21895 Microseconds
+User CPU time: 21262 Microseconds
+System CPU time: 0 Microseconds
+Bad Files: 0
+Directories: 127
+Regular Files: 95
+Special Files: 0
+Regular File Bytes: 362799
+Text Files: 89
+Text File Bytes: 216809
+]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj4[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj4[00m$ ls -1d /etc/* | ./prroj4 thread 10
+Running in thread mode with 10 threads.
+Wall clock time: 19633 Microseconds
+User CPU time: 22074 Microseconds
+System CPU time: 23088 Microseconds
+Bad Files: 0
+Directories: 127
+Regular Files: 95
+Special Files: 0
+Regular File Bytes: 362799
+Text Files: 89
+Text File Bytes: 216809
+]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj4[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj4[00m$ make clean
+rm proj4
+]0;student@Xubuntu-AY2018-19: ~/Desktop/Operating-Systems/proj4[01;32mstudent@Xubuntu-AY2018-19[00m:[01;34m~/Desktop/Operating-Systems/proj4[00m$ exit
+
+Script done on 2019-10-10 12:01:56-0400
